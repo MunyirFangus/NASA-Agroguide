@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NASA AgroGuide</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,sans-serif;
+  background:#edf4ed;color:#203b2a
+}
+header{
+  background:#174b32;color:white;
+  padding:25px 8%;text-align:center
+}
+header h1{margin:0;font-size:30px}
+header p{color:#d4e8d8}
+main{max-width:850px;margin:25px auto;padding:15px}
+.card{
+  background:white;padding:22px;margin-bottom:18px;
+  border-radius:13px;box-shadow:0 3px 12px #0001
+}
+h2{color:#247345;margin-top:0}
+label{display:block;margin-top:12px;font-weight:bold}
+input,select{
+  width:100%;padding:12px;margin-top:6px;
+  border:1px solid #ccd6cc;border-radius:7px
+}
+button{
+  width:100%;padding:14px;margin-top:18px;
+  border:0;border-radius:8px;
+  background:#287747;color:white;
+  font-weight:bold;font-size:16px;cursor:pointer
+}
+button:hover{background:#195b34}
+.result{
+  background:#edf5ed;padding:15px;
+  border-radius:9px;margin-top:15px
+}
+a{color:#247345}
+footer{text-align:center;padding:20px;color:#667}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌱 NASA AgroGuide</h1>
+  <p>Satellite-powered soil moisture guidance for farmers</p>
+  <small>Powered by NASA SMAP observations</small>
+</header>
+
+<main>
+
+<section class="card">
+  <h2>📍 Farm Location</h2>
+  <p>Enter the coordinates of your farm.</p>
+
+  <label>Latitude</label>
+  <input id="lat" type="number" step="any" value="4.40">
+
+  <label>Longitude</label>
+  <input id="lon" type="number" step="any" value="113.99">
+
+  <button onclick="viewMap()">View NASA SMAP Map</button>
+
+  <div class="result">
+    <b>How it works</b>
+    <p>AgroGuide opens NASA Worldview centered on your farm to display satellite soil-moisture imagery.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>🌍 Understand Soil Moisture</h2>
+  <p>After viewing the NASA map, choose the moisture condition shown for your area.</p>
+
+  <label>Estimated soil moisture condition</label>
+  <select id="moisture">
+    <option value="">Select condition</option>
+    <option value="dry">Low / Dry</option>
+    <option value="medium">Moderate</option>
+    <option value="wet">High / Wet</option>
+  </select>
+
+  <button onclick="getAdvice()">Get Farming Advice</button>
+
+  <div class="result" id="advice">
+    Your farming recommendations will appear here.
+  </div>
+</section>
+
+<section class="card">
+  <h2>🛰️ About NASA SMAP</h2>
+  <p>
+    NASA's Soil Moisture Active Passive (SMAP) mission
+    observes soil moisture around the world using
+    satellite-based microwave measurements.
+  </p>
+  <p>
+    The enhanced daily SMAP soil-moisture product
+    provides approximately 9 km resolution.
+  </p>
+  <a href="https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/smap"
+     target="_blank">Learn more about NASA SMAP →</a>
+</section>
+
+</main>
+
+<footer>
+  NASA AgroGuide | Educational prototype
+  <br>Satellite estimates are not a replacement for field soil testing.
+</footer>
+
+<script>
+function viewMap(){
+  const lat = Number(document.getElementById("lat").value);
+  const lon = Number(document.getElementById("lon").value);
+
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||
+     lat < -85 || lat > 85 || lon < -180 || lon > 180){
+    alert("Please enter valid coordinates.");
+    return;
+  }
+
+  const west = Math.max(-180, lon - 5);
+  const east = Math.min(180, lon + 5);
+  const south = Math.max(-85, lat - 4);
+  const north = Math.min(85, lat + 4);
+
+  const today = new Date().toISOString().slice(0,10);
+
+  const url = new URL("https://worldview.earthdata.nasa.gov/");
+  url.searchParams.set("v",
+    [west,south,east,north].join(","));
+  url.searchParams.set("l",
+    "SMAP_L3_Passive_Enhanced_Day_Soil_Moisture,Coastlines_15m");
+  url.searchParams.set("t",today);
+
+  window.open(url.toString(),"_blank");
+}
+
+function getAdvice(){
+  const moisture = document.getElementById("moisture").value;
+  const box = document.getElementById("advice");
+
+  const advice = {
+    dry: "<b>Dry conditions</b><p>Consider crops with lower water requirements, improve soil cover and check whether irrigation is needed.</p>",
+    medium: "<b>Moderate conditions</b><p>Consider balanced crop choices and monitor moisture regularly to avoid unnecessary watering.</p>",
+    wet: "<b>Wet conditions</b><p>Consider crops suited to wetter conditions and check drainage to reduce waterlogging.</p>"
+  };
+
+  box.innerHTML = advice[moisture] ||
+    "Please select a soil-moisture condition first.";
+}
+</script>
+
+</body>
+</html>
